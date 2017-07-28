@@ -1,0 +1,988 @@
+//doctype html
+html(xmlns='http://www.w3.org/1999/xhtml')
+    head
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        title wikipedia revision
+        // Bootstrap Styles
+        link(href="/bootstrap/dist/css/bootstrap.min.css", rel="stylesheet")
+        // FontAwesome Styles
+        link(href='/font-awesome.css', rel='stylesheet')
+        // CSStyles
+        link(href='/demo.css', rel='stylesheet')
+       
+        // Google Fonts
+        //link(href='http://fonts.useso.com/css?family=Electrolize', rel='stylesheet', type='text/css')
+        script(src="/jquery/dist/jquery.min.js")
+        script(src="/bootstrap/dist/js/bootstrap.min.js")
+        script(src="/echarts.min.js")
+        script(src="/typeahead.js/typeahead.jquery.js")
+    body
+        #wrapper
+            nav.navbar.navbar-default.top-navbar(role='navigation')
+                .navbar-header
+                    button.navbar-toggle(type='button', data-toggle='collapse', data-target='.sidebar-collapse')
+                        span.sr-only Toggle navigation
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    h1.navbar-brand wikipedia revision
+            // /. NAV SIDE
+            #page-wrapper
+                #page-inner
+                    #overall.row
+                        .col-md-12
+                            h1.page-header
+                                | OVERALL STATISTICS
+                    // /. ROW
+                    .row.text-center
+                        .col-md-9.col-sm-12.col-xs-12
+                            .panel.panel-primary.text-center.no-boder.bg-color-blue
+                                .panel-body
+                                    |  The article with most number of revisions:  #{statistics.articleWithMostNumberOfRevision}
+                                    <br />
+                                    |  The article with least number Of revisions:  #{statistics.articleWithLeastNumberOfRevision}
+                                    <br />
+                                    |  The article edited by largest group of registered users: #{statistics.articleEditedByLargestGroupOfRegisteredUsers}
+                                    <br />
+                                    |  The article edited by smallest group of registered users: #{statistics.articleEditedBySmallestGroupOfRegisteredUsers}
+                                    <br />
+                                    |  The article with the longest history: #{statistics.longestHistory}
+                                    <br />
+                                    |  The article with the shortest history: #{statistics.shortestHistory}
+
+                    .row
+                        .col-md-9.col-sm-12.col-xs-12
+                            .panel.panel-default
+                                .panel-body
+                                    #chartOverall(style='width: 550px;height:370px;')
+                                        script(type='text/javascript').
+                                            // initiate echarts
+                                            var myChart = echarts.init(document.getElementById('chartOverall'));
+                                            var barChartData = !{JSON.stringify(barChartUserTypeCount)};
+                                            var yearData = !{JSON.stringify(allYear)};
+                                            var yearDataArray = [];
+                                            for (i = 0; i < yearData.length; i++) {
+                                                yearDataArray.push(parseInt(yearData[i]._id))
+                                            }
+                                            var adminArray = [];
+                                            var botArray = [];
+                                            var anonArray = [];
+                                            var regArray = [];
+
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.admin.length; j++) {
+                                                    if (barChartData.admin[j]._id == yearData[i]._id) {
+                                                        adminArray[i] = (barChartData.admin[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.bot.length; j++) {
+                                                    if (barChartData.bot[j]._id == yearData[i]._id) {
+                                                        botArray[i] = (barChartData.bot[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.anon.length; j++) {
+                                                    if (barChartData.anon[j]._id == yearData[i]._id) {
+                                                        anonArray[i] = (barChartData.anon[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.reg.length; j++) {
+                                                    if (barChartData.reg[j]._id == yearData[i]._id) {
+                                                        regArray[i] = (barChartData.reg[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+
+                                            // Chart configuration and data
+                                            var option = {
+                                                title: {
+                                                    text: 'Revision distribution by year and by user type',
+                                                    x: 'center'
+                                                },
+                                                tooltip: {
+                                                    trigger: 'axis'
+                                                },
+                                                legend: {
+                                                    x: 'center',
+                                                    y: 'bottom',
+                                                    data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                },
+                                                calculable: true,
+                                                xAxis: [
+                                                    {
+                                                        type: 'category',
+                                                        data: yearDataArray
+                                                    }
+                                                ],
+                                                yAxis: [
+                                                    {
+                                                        type: 'value'
+                                                    }
+                                                ],
+                                                series: [
+                                                    {
+                                                        name: 'Administrator',
+                                                        type: 'bar',
+                                                        data: adminArray,
+                                                    },
+                                                    {
+                                                        name: 'Bot',
+                                                        type: 'bar',
+                                                        data: botArray,
+                                                    },
+                                                    {
+                                                        name: 'Anonymous',
+                                                        type: 'bar',
+                                                        data: anonArray,
+                                                    },
+                                                    {
+                                                        name: 'Regular',
+                                                        type: 'bar',
+                                                        data: regArray,
+                                                    }
+                                                ]
+                                            };
+                                            myChart.setOption(option);
+
+                    // /. ROW
+                    select#chartSelectorOverall.form-group
+                        option(value='bar' selected = "selected") Revision distribution by year and by user type
+                        option(value='pie') Pie chart of revision number distribution by user type
+                            script(type='text/javascript').
+                                var overallSelector = document.getElementById('chartSelectorOverall')
+                                overallSelector.addEventListener('change',function () {
+                                    switch ($("#chartSelectorOverall").val()) {
+                                        case "bar":
+                                            // initiate echarts
+                                            var myChart = echarts.init(document.getElementById('chartOverall'));
+                                            var barChartData = !{JSON.stringify(barChartUserTypeCount)};
+                                            var yearData = !{JSON.stringify(allYear)};
+                                            var yearDataArray = [];
+                                            for (i = 0; i < yearData.length; i++) {
+                                                yearDataArray.push(parseInt(yearData[i]._id))
+                                            }
+                                            var adminArray = [];
+                                            var botArray = [];
+                                            var anonArray = [];
+                                            var regArray = [];
+
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.admin.length; j++) {
+                                                    if (barChartData.admin[j]._id == yearData[i]._id) {
+                                                        adminArray[i] = (barChartData.admin[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.bot.length; j++) {
+                                                    if (barChartData.bot[j]._id == yearData[i]._id) {
+                                                        botArray[i] = (barChartData.bot[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.anon.length; j++) {
+                                                    if (barChartData.anon[j]._id == yearData[i]._id) {
+                                                        anonArray[i] = (barChartData.anon[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            for (i = 0; i < yearData.length; i++) {
+                                                for (j = 0; j < barChartData.reg.length; j++) {
+                                                    if (barChartData.reg[j]._id == yearData[i]._id) {
+                                                        regArray[i] = (barChartData.reg[j].count)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+
+                                            // Chart configuration and data
+                                            var option = {
+                                                title: {
+                                                    text: 'Revision distribution by year and by user type',
+                                                    x: 'center'
+                                                },
+                                                tooltip: {
+                                                    trigger: 'axis'
+                                                },
+                                                legend: {
+                                                    x: 'center',
+                                                    y: 'bottom',
+                                                    data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                },
+                                                calculable: true,
+                                                xAxis: [
+                                                    {
+                                                        type: 'category',
+                                                        data: yearDataArray
+                                                    }
+                                                ],
+                                                yAxis: [
+                                                    {
+                                                        type: 'value'
+                                                    }
+                                                ],
+                                                series: [
+                                                    {
+                                                        name: 'Administrator',
+                                                        type: 'bar',
+                                                        data: adminArray,
+                                                    },
+                                                    {
+                                                        name: 'Bot',
+                                                        type: 'bar',
+                                                        data: botArray,
+                                                    },
+                                                    {
+                                                        name: 'Anonymous',
+                                                        type: 'bar',
+                                                        data: anonArray,
+                                                    },
+                                                    {
+                                                        name: 'Regular',
+                                                        type: 'bar',
+                                                        data: regArray,
+                                                    }
+                                                ]
+                                            };
+                                            myChart.setOption(option);
+
+                                            break
+                                        case "pie":
+                                            // initiate echarts
+                                            var myChart = echarts.init(document.getElementById('chartOverall'));
+                                            // Chart configuration and data
+                                            var pieChartData = !{JSON.stringify(pieChartUserTypeCount)}
+                                            var option = {
+                                                title: {
+                                                    text: 'Revision number distribution by user type',
+                                                    x: 'center'
+                                                },
+                                                tooltip: {
+                                                    trigger: 'item',
+                                                    formatter: "{b} : {c} ({d}%)"
+                                                },
+                                                legend: {
+                                                    x: 'center',
+                                                    y: 'bottom',
+                                                    data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                },
+                                                calculable: true,
+                                                series: [
+                                                    {
+                                                        type: 'pie',
+                                                        radius: '55%',
+                                                        center: ['50%', '50%'],
+                                                       
+                                                        data: [
+                                                            {value: pieChartData.admin, name: 'Administrator'},
+                                                            {value: pieChartData.bot, name: 'Bot'},
+                                                            {value: pieChartData.anon, name: 'Anonymous'},
+                                                            {value: pieChartData.regular, name: 'Regular'}
+                                                        ]
+
+                                                    }
+                                                ]
+                                            };
+                                            myChart.setOption(option);
+                                            break
+
+                                    }
+                                })
+
+                    // /. ROW
+                    #individual.row
+                        .col-md-12
+                            h1.page-header
+                                | INDIVIDUAL STATISTICS
+                                
+                    // /. ROW
+                    .form-group
+                            script(type='text/javascript').
+                                var titles = !{JSON.stringify(allArticleTitle)}
+                                var titlesArray = []
+                                for (i = 0; i < titles.length; i++) {
+                                    titlesArray.push(titles[i]._id)
+                                }
+                              
+
+                                $("#search").click(function () {
+                                    $.ajax({
+                                        type: "get",
+                                        url: "/individual/" + $("#searchInput").val(),
+                                        dataType: "json",
+                                        success: function (data) {
+                                            if (data!=null&&data!="") {
+                                                if(data=="false"){
+                                                    alert('cannot get results');
+                                                }else {
+                                                    document.getElementById("indiDiv").style.display=""
+                                                    var totalNum = document.getElementById('totalNum')
+                                                    var title_indi = document.getElementById('title_indi')
+                                                    title_indi.innerHTML = $("#searchInput").val()
+                                                    totalNum.innerHTML = data.numRevision;
+                                                    $('#topFive').empty();
+                                                    for (i=0;i<data.top5.length;i++){
+                                                        (function (i) {
+                                                            var li = document.createElement("LI")
+                                                            li.id=data.top5[i].user
+                                                            var text = document.createTextNode(data.top5[i].user+": "+data.top5[i].count)
+
+                                                            li.onclick = function () {
+                                                                $.ajax({
+                                         
+                                                                    type: "post",
+                                                                    url: "/individual/userDistribution/"+data.title+"&"+data.top5[i].user+"&"+Math.random(),
+                                                                    dataType: "json",
+                                                                    success: function (singleUserData) {
+                                                                        if (singleUserData != null && singleUserData != "") {
+                                                                            var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                                            var yearData = singleUserData.indiAllYear;
+                                                                            var yearDataArray = [];
+                                                                            for (i = 0; i < yearData.length; i++) {
+                                                                                yearDataArray.push(parseInt(yearData[i]._id))
+                                                                            }
+                                                                            var userArray = [];
+                                                                            for (i = 0; i < yearData.length; i++) {
+                                                                                for (j = 0; j < singleUserData.userDistribution.length; j++) {
+                                                                                    if (singleUserData.userDistribution[j]._id == yearData[i]._id) {
+                                                                                        userArray[i] = (singleUserData.userDistribution[j].count)
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            }
+
+                                                                            // Chart configuration and data
+                                                                            var option = {
+                                                                                title: {
+                                                                                    text: singleUserData.user+' yearly revision distribution',
+                                                                                    x: 'center'
+                                                                                },
+                                                                                tooltip: {
+                                                                                    trigger: 'axis'
+                                                                                },
+                                                                                legend: {
+                                                                                    x: 'center',
+                                                                                    y: 'bottom',
+                                                                                    data: [singleUserData.user]
+                                                                                },
+                                                                                calculable: true,
+                                                                                xAxis: [
+                                                                                    {
+                                                                                        type: 'category',
+                                                                                        data: yearDataArray
+                                                                                    }
+                                                                                ],
+                                                                                yAxis: [
+                                                                                    {
+                                                                                        type: 'value'
+                                                                                    }
+                                                                                ],
+                                                                                series: [
+                                                                                    {
+                                                                                        name: singleUserData.user,
+                                                                                        type: 'bar',
+                                                                                        data: userArray,
+                                                                                    }
+                                                                                ]
+                                                                            };
+                                                                            myChart.setOption(option);
+                                                                        } else {
+                                                                            alert('no result');
+                                                                        }
+                                                                    }
+                                                                })
+                                                            }
+                                                            li.appendChild(text)
+                                                            document.getElementById("topFive").appendChild(li)
+                                                        })(i);
+                                                    }
+
+                                                    var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                    $("#ChartIndi").css("display","block");
+                                                    $("#chartSelect").css("display","block");
+                                                    var option = {
+                                                        title: {
+                                                            text: 'User type distribution',
+                                                            x: 'center'
+                                                        },
+                                                        tooltip: {
+                                                            trigger: 'item',
+                                                            formatter: "{b} : {c} ({d}%)"
+                                                        },
+                                                        legend: {
+                                                            x: 'center',
+                                                            y: 'bottom',
+                                                            data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                        },
+                                                        calculable: true,
+                                                        series: [
+                                                            {
+                                                                type: 'pie',
+                                                                radius:'55%',
+                                                                center: ['50%', '50%'],
+                                                                data: [
+                                                                    {value: data.indiAdmin, name: 'Administrator'},
+                                                                    {value: data.indiBot, name: 'Bot'},
+                                                                    {value: data.indiAnon, name: 'Anonymous'},
+                                                                    {value: data.indiReg, name: 'Regular'}
+                                                                ]
+
+                                                            }
+                                                        ]
+                                                    };
+                                                    myChart.setOption(option);
+
+                                                    //create chart selector
+                                                    if(document.getElementById('chartSelect')!=null)
+                                                        $("#chartSelect").remove()
+                                                    var chartSelect = document.createElement("select");
+                                                    chartSelect.id = "chartSelect";
+                                                    //$("#chartSelect").after($("#chartSelector"));
+                                                    //-document.body.appendChild(chartSelect);
+                                                    document.getElementById('chartSelector').appendChild(chartSelect)
+                                                    var obj = document.getElementById('chartSelect');
+                                                    obj.options.add(new Option("User type distribution", "pie"));
+                                                    obj.options.add(new Option("Yearly revision number distribution", "bar"));
+
+                                                    obj.addEventListener('change',function () {
+                                                        switch ($("#chartSelect").val()) {
+                                                            case "pie":
+                                                                var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                                $("#ChartIndi").css("display", "block");
+                                                                $("#chartSelect").css("display", "block");
+                                                                var option = {
+                                                                    title: {
+                                                                        text: 'User type distribution',
+                                                                        x: 'center'
+                                                                    },
+                                                                    tooltip: {
+                                                                        trigger: 'item',
+                                                                        formatter: "{b} : {c} ({d}%)"
+                                                                    },
+                                                                    legend: {
+                                                                        x: 'center',
+                                                                        y: 'bottom',
+                                                                        data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                                    },
+                                                                    calculable: true,
+                                                                    series: [
+                                                                        {
+                                                                            type: 'pie',
+                                                                            radius: '55%',
+                                                                            center: ['50%', '50%'],
+                                                                            
+                                                                            data: [
+                                                                                {
+                                                                                    value: data.indiAdmin,
+                                                                                    name: 'Administrator'
+                                                                                },
+                                                                                {value: data.indiBot, name: 'Bot'},
+                                                                                {
+                                                                                    value: data.indiAnon,
+                                                                                    name: 'Anonymous'
+                                                                                },
+                                                                                {
+                                                                                    value: data.indiReg,
+                                                                                    name: 'Regular'
+                                                                                }
+                                                                            ]
+
+                                                                        }
+                                                                    ]
+                                                                };
+                                                                myChart.setOption(option);
+                                                                break;
+                                                            case "bar":
+                                                                // initiate echarts
+                                                                var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                                var yearData = data.indiAllYear;
+                                                                var yearDataArray = [];
+                                                                for (i = 0; i < yearData.length; i++) {
+                                                                    yearDataArray.push(parseInt(yearData[i]._id))
+                                                                }
+                                                                var adminArray = [];
+                                                                var botArray = [];
+                                                                var anonArray = [];
+                                                                var regArray = [];
+
+
+                                                                for (i = 0; i < yearData.length; i++) {
+                                                                    for (j = 0; j < data.indiYearAdmin.length; j++) {
+                                                                        if (data.indiYearAdmin[j]._id == yearData[i]._id) {
+                                                                            adminArray[i] = (data.indiYearAdmin[j].count)
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                for (i = 0; i < yearData.length; i++) {
+                                                                    for (j = 0; j < data.indiYearBot.length; j++) {
+                                                                        if (data.indiYearBot[j]._id == yearData[i]._id) {
+                                                                            botArray[i] = (data.indiYearBot[j].count)
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                for (i = 0; i < yearData.length; i++) {
+                                                                    for (j = 0; j < data.indiYearAnon.length; j++) {
+                                                                        if (data.indiYearAnon[j]._id == yearData[i]._id) {
+                                                                            anonArray[i] = (data.indiYearAnon[j].count)
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                for (i = 0; i < yearData.length; i++) {
+                                                                    for (j = 0; j < data.indiYearReg.length; j++) {
+                                                                        if (data.indiYearReg[j]._id == yearData[i]._id) {
+                                                                            regArray[i] = (data.indiYearReg[j].count)
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+
+
+                                                                // Chart configuration and data
+                                                                var option = {
+                                                                    title: {
+                                                                        text: 'Revision distribution by year and by user type',
+                                                                        x: 'center'
+                                                                    },
+                                                                    tooltip: {
+                                                                        trigger: 'axis'
+                                                                    },
+                                                                    legend: {
+                                                                        x: 'center',
+                                                                        y: 'bottom',
+                                                                        data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                                    },
+                                                                    calculable: true,
+                                                                    xAxis: [
+                                                                        {
+                                                                            type: 'category',
+                                                                            data: yearDataArray
+                                                                        }
+                                                                    ],
+                                                                    yAxis: [
+                                                                        {
+                                                                            type: 'value'
+                                                                        }
+                                                                    ],
+                                                                    series: [
+                                                                        {
+                                                                            name: 'Administrator',
+                                                                            type: 'bar',
+                                                                            data: adminArray,
+                                                                        },
+                                                                        {
+                                                                            name: 'Bot',
+                                                                            type: 'bar',
+                                                                            data: botArray,
+                                                                        },
+                                                                        {
+                                                                            name: 'Anonymous',
+                                                                            type: 'bar',
+                                                                            data: anonArray,
+                                                                        },
+                                                                        {
+                                                                            name: 'Regular',
+                                                                            type: 'bar',
+                                                                            data: regArray,
+                                                                        }
+                                                                    ]
+                                                                };
+                                                                myChart.setOption(option);
+                                                                break;
+                                                        }
+                                                    })
+                                                    if (data.wikiMediaData!="undefined"){
+                                                        if (data.mediaData==true){
+                                                            alert("Data updated, "+data.wikiMediaData.length+ " revisions saved")
+                                                        }else {
+                                                            alert("Queried, but no new revisions")
+                                                        }
+
+                                                    }
+                                                }
+                                            } else {
+                                                alert('no result');
+                                            }
+                                        }
+                                    });
+                                });
+                    .form-group
+                        select#titleSelect.form-control
+                            script(type='text/javascript').
+                                var obj = document.getElementById('titleSelect')
+                                for (i=0;i<titles.length;i++){
+                                    obj.options.add(new Option(titles[i]._id, titles[i]._id))
+                                }
+                    button#buttonSelect.btn.btn-primary.btn-block(type='submit') Submit
+                        script(type='text/javascript').
+                            $("#buttonSelect").click(function () {
+                                $.ajax({
+                                    type: "get",
+                                    url: "/individual/" + $("#titleSelect").val(),
+                                    dataType: "json",
+                                    success: function (data) {
+                                        if (data != null && data != "") {
+                                            if (data == "false") {
+                                                alert('no result');
+                                            } else {
+                                                document.getElementById("indiDiv").style.display = ""
+                                                var totalNum = document.getElementById('totalNum')
+                                                var title_indi = document.getElementById('title_indi')
+                                                totalNum.innerHTML = data.numRevision
+                                                title_indi.innerHTML = $("#titleSelect").val()
+                                                $('#topFive').empty()
+                                                for (i = 0; i < data.top5.length; i++) {
+                                                    (function (i) {
+                                                        var li = document.createElement("LI")
+                                                        var text = document.createTextNode(data.top5[i].user + ": " + data.top5[i].count)
+                                                        li.onclick = function () {
+                                                            $.ajax({
+                                                                //async: false,
+                                                                type: "post",
+                                                                url: "/individual/userDistribution/" + data.title + "&" + data.top5[i].user + "&" + Math.random(),
+                                                                dataType: "json",
+                                                                success: function (singleUserData) {
+                                                                    if (singleUserData != null && singleUserData != "") {
+                                                                        var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                                        var yearData = singleUserData.indiAllYear;
+                                                                        var yearDataArray = [];
+                                                                        for (i = 0; i < yearData.length; i++) {
+                                                                            yearDataArray.push(parseInt(yearData[i]._id))
+                                                                        }
+                                                                        var userArray = [];
+                                                                        for (i = 0; i < yearData.length; i++) {
+                                                                            for (j = 0; j < singleUserData.userDistribution.length; j++) {
+                                                                                if (singleUserData.userDistribution[j]._id == yearData[i]._id) {
+                                                                                    userArray[i] = (singleUserData.userDistribution[j].count)
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        // Chart configuration and data
+                                                                        var option = {
+                                                                            color: ['#38648c'],
+                                                                            title: {
+                                                                                text: singleUserData.user + ' yearly revision distribution',
+                                                                                x: 'center'
+                                                                            },
+                                                                            tooltip: {
+                                                                                trigger: 'axis'
+                                                                            },
+                                                                            legend: {
+                                                                                x: 'center',
+                                                                                y: 'bottom',
+                                                                                data: [singleUserData.user]
+                                                                            },
+                                                                            calculable: true,
+                                                                            xAxis: [
+                                                                                {
+                                                                                    type: 'category',
+                                                                                    data: yearDataArray
+                                                                                }
+                                                                            ],
+                                                                            yAxis: [
+                                                                                {
+                                                                                    type: 'value'
+                                                                                }
+                                                                            ],
+                                                                            series: [
+                                                                                {
+                                                                                    name: singleUserData.user,
+                                                                                    type: 'bar',
+                                                                                    data: userArray,
+                                                                                }
+                                                                            ]
+                                                                        };
+                                                                        myChart.setOption(option);
+                                                                    } else {
+                                                                        alert('no result');
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                        li.appendChild(text)
+                                                        document.getElementById("topFive").appendChild(li)
+                                                    })(i);
+                                                }
+
+                                                var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                $("#ChartIndi").css("display", "block");
+                                                $("#chartSelect").css("display", "block");
+                                                var option = {
+                                                    title: {
+                                                        text: 'User type distribution',
+                                                        x: 'center'
+                                                    },
+                                                    tooltip: {
+                                                        trigger: 'item',
+                                                        formatter: "{b} : {c} ({d}%)"
+                                                    },
+                                                    legend: {
+                                                        x: 'center',
+                                                        y: 'bottom',
+                                                        data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                    },
+                                                    calculable: true,
+                                                    series: [
+                                                        {
+                                                            type: 'pie',
+                                                            radius: '55%',
+                                                            center: ['50%', '50%'],
+                                                            
+                                                            data: [
+                                                                {value: data.indiAdmin, name: 'Administrator'},
+                                                                {value: data.indiBot, name: 'Bot'},
+                                                                {value: data.indiAnon, name: 'Anonymous'},
+                                                                {value: data.indiReg, name: 'Regular'}
+                                                            ]
+
+                                                        }
+                                                    ]
+                                                };
+                                                myChart.setOption(option);
+
+                                                //create chart selector
+                                                if (document.getElementById('chartSelect') != null)
+                                                    $("#chartSelect").remove()
+                                                var chartSelect = document.createElement("select");
+                                                chartSelect.id = "chartSelect";
+                                                //$("#chartSelect").after($("#chartSelector"));
+                                                //-document.body.appendChild(chartSelect);
+                                                document.getElementById('chartSelector').appendChild(chartSelect)
+                                                var obj = document.getElementById('chartSelect');
+                                                obj.options.add(new Option("User type distribution", "pie"));
+                                                obj.options.add(new Option("Yearly revision number distribution", "bar"));
+
+                                                obj.addEventListener('change', function () {
+                                                    switch ($("#chartSelect").val()) {
+                                                        case "pie":
+                                                            var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                            $("#ChartIndi").css("display", "block");
+                                                            $("#chartSelect").css("display", "block");
+                                                            var option = {
+                                                                title: {
+                                                                    text: 'User type distribution',
+                                                                    x: 'center'
+                                                                },
+                                                                tooltip: {
+                                                                    trigger: 'item',
+                                                                    formatter: "{b} : {c} ({d}%)"
+                                                                },
+                                                                legend: {
+                                                                    x: 'center',
+                                                                    y: 'bottom',
+                                                                    data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                                },
+                                                                calculable: true,
+                                                                series: [
+                                                                    {
+                                                                        type: 'pie',
+                                                                        radius: '55%',
+                                                                        center: ['50%', '50%'],
+                                                                       
+                                                                        data: [
+                                                                            {
+                                                                                value: data.indiAdmin,
+                                                                                name: 'Administrator'
+                                                                            },
+                                                                            {value: data.indiBot, name: 'Bot'},
+                                                                            {
+                                                                                value: data.indiAnon,
+                                                                                name: 'Anonymous'
+                                                                            },
+                                                                            {
+                                                                                value: data.indiReg,
+                                                                                name: 'Regular'
+                                                                            }
+                                                                        ]
+
+                                                                    }
+                                                                ]
+                                                            };
+                                                            myChart.setOption(option);
+                                                            break;
+                                                        case "bar":
+                                                            // initiate echarts
+                                                            var myChart = echarts.init(document.getElementById('ChartIndi'));
+                                                            var yearData = data.indiAllYear;
+                                                            var yearDataArray = [];
+                                                            for (i = 0; i < yearData.length; i++) {
+                                                                yearDataArray.push(parseInt(yearData[i]._id))
+                                                            }
+                                                            var adminArray = [];
+                                                            var botArray = [];
+                                                            var anonArray = [];
+                                                            var regArray = [];
+
+
+                                                            for (i = 0; i < yearData.length; i++) {
+                                                                for (j = 0; j < data.indiYearAdmin.length; j++) {
+                                                                    if (data.indiYearAdmin[j]._id == yearData[i]._id) {
+                                                                        adminArray[i] = (data.indiYearAdmin[j].count)
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            for (i = 0; i < yearData.length; i++) {
+                                                                for (j = 0; j < data.indiYearBot.length; j++) {
+                                                                    if (data.indiYearBot[j]._id == yearData[i]._id) {
+                                                                        botArray[i] = (data.indiYearBot[j].count)
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            for (i = 0; i < yearData.length; i++) {
+                                                                for (j = 0; j < data.indiYearAnon.length; j++) {
+                                                                    if (data.indiYearAnon[j]._id == yearData[i]._id) {
+                                                                        anonArray[i] = (data.indiYearAnon[j].count)
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            for (i = 0; i < yearData.length; i++) {
+                                                                for (j = 0; j < data.indiYearReg.length; j++) {
+                                                                    if (data.indiYearReg[j]._id == yearData[i]._id) {
+                                                                        regArray[i] = (data.indiYearReg[j].count)
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+
+
+                                                            // Chart configuration and data
+                                                            var option = {
+                                                                title: {
+                                                                    text: 'Revision distribution by year and by user type',
+                                                                    x: 'center'
+                                                                },
+                                                                tooltip: {
+                                                                    trigger: 'axis'
+                                                                },
+                                                                legend: {
+                                                                    x: 'center',
+                                                                    y: 'bottom',
+                                                                    data: ['Administrator', 'Bot', 'Anonymous', 'Regular']
+                                                                },
+                                                                calculable: true,
+                                                                xAxis: [
+                                                                    {
+                                                                        type: 'category',
+                                                                        data: yearDataArray
+                                                                    }
+                                                                ],
+                                                                yAxis: [
+                                                                    {
+                                                                        type: 'value'
+                                                                    }
+                                                                ],
+                                                                series: [
+                                                                    {
+                                                                        name: 'Administrator',
+                                                                        type: 'bar',
+                                                                        data: adminArray,
+                                                                    },
+                                                                    {
+                                                                        name: 'Bot',
+                                                                        type: 'bar',
+                                                                        data: botArray,
+                                                                    },
+                                                                    {
+                                                                        name: 'Anonymous',
+                                                                        type: 'bar',
+                                                                        data: anonArray,
+                                                                    },
+                                                                    {
+                                                                        name: 'Regular',
+                                                                        type: 'bar',
+                                                                        data: regArray,
+                                                                    }
+                                                                ]
+                                                            };
+                                                            myChart.setOption(option);
+                                                            break;
+                                                    }
+                                                })
+                                                if (data.wikiMediaData != "undefined") {
+                                                    if (data.mediaData == true) {
+                                                        alert(data.wikiMediaData.length + " new revisions updated")
+                                                    } else {
+                                                        alert("No new revisions updated")
+                                                    }
+
+                                                }
+                                            }
+                                        } else {
+                                            alert('no result');
+                                        }
+                                    }
+                                });
+                            });
+
+                // /.col-lg-6 (nested)
+                .row
+                    #indiDiv(style='display: none')
+                        .col-md-3.col-sm-12.col-xs-12
+                            .panel.panel-primary.text-center.no-boder.bg-color-blue
+                                .panel-body
+                                     #title_indi
+                                     </br>
+                                     #totalNum
+                                
+                           
+                            .panel.panel-primary.text-center.no-boder.bg-color-blue
+                                .panel-footer.back-footer-blue
+                                    | Top 5 Regular Users Ordered
+                                .panel-body#topFive
+                                
+                            #chartSelector
+                        .col-md-9.col-sm-12.col-xs-12
+                            .panel.panel-default
+                                .panel-body
+                                    #ChartIndi(style='width: 500px;height:400px;display:none;')
+                            .form-group
+                            select#chartSelect.form-control(style='display:none;',onchange='switchChart(this.options[this.options.selectedIndex].value)')
+                                option(value='bar' selected = "selected") Bar chart-Yearly revision number distribution
+                                option(value='pie') Pie chart-User type distribution
+                                    script(type='text/javascript').
+                // /. ROW
+            // /. PAGE INNER
+        // /. PAGE WRAPPER
+        // /. WRAPPER
+        // JS Scripts
+        // jQuery Js
+        script(src='https://code.jquery.com/jquery-3.0.0.js')
+        // Bootstrap Js
+        script(src='/bootstrap/dist/css/bootstrap.min.css')
+       
